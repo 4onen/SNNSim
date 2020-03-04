@@ -1,0 +1,9 @@
+- model: 'Input'
+  name: 'TheInput'
+
+- model: 'LIF'
+  name: 'TheOne'
+  inputs: ['TheInput']
+
+- model: 'Output'
+  inputs: ['TheOne']
