@@ -18,7 +18,7 @@ def readInput(data):
         frameFreqs[i, 0] = frame['onFreq']
         frameFreqs[i, 1] = frame['offFreq']
 
-    return (frameTimes, frameFreqs, frameData)
+    return (frameTimeSum, frameTimes, frameFreqs, frameData)
 
 
 def readInputFile(filename):
