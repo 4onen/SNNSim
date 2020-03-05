@@ -4,6 +4,7 @@ import NetworkParser
 from Neuron import *
 from scipy.sparse.linalg import splu
 import scipy.sparse
+import math
 
 tstep = 0.001
 
@@ -19,7 +20,7 @@ def simulator(modelFile, inputFile):
     hasNonlinear = any(map(lambda n: n.hasNonlinear, modelNeurons))
 
     # Allocate storage vectors
-    spikes = np.zeros((spikerCnt, 1), dtype=bool)
+    spikes = np.zeros((spikerCnt, 5), dtype=bool)
     Y0 = scipy.sparse.lil_matrix((matSize, matSize))
     J0 = np.zeros((matSize, 1))
 
@@ -34,19 +35,18 @@ def simulator(modelFile, inputFile):
 
     # Initialize output neurons with number of steps
     for n in outputNeurons:
-        n.init_stepcount(tstop//tstep)
+        n.init_stepcount(1+math.ceil(tstop/tstep))
 
     # Prepare state variables
     v = np.zeros((matSize, 1))+restingPotential
-    tidx = -1
+    tidx = 0
     t = 0
     while t < tstop:
-        tidx += 1
-
         # Stamp new excitation vector
         J = J0
-        for n in modelNeurons:
-            J = n.stampCompanionJ(J, spikes)
+        for i, n in enumerate(modelNeurons):
+            stdpSpiked = spikes[i+len(inputNeurons), 2]
+            J = n.stampCompanionJ(J, spikes, stdpSpiked)
 
         # Simulation step
         if hasNonlinear:
@@ -57,13 +57,22 @@ def simulator(modelFile, inputFile):
         # Calculate step spikes
         for i, input in enumerate(inputNeurons):
             # TODO: I don't know the best way to decide when input cells spike
-            raise NotImplementedError()
+            pass  # raise NotImplementedError()
         # TODO: No FN support here.
-        spikes[len(inputNeurons):end] = v > LIFThreshold
+        spikes[:, 1:4] = spikes[:, 0:3]
+        spikes[len(inputNeurons):-1, 0] = v > LIFThreshold
 
         # Write spikes to outputs
         for n in outputNeurons:
-            n.add_datapoint(tidx, spikes)
+            n.add_datapoint(tidx, spikes[:, 0])
+
+        # Advance time
+        t += tstep
+        tidx += 1
+
+    tsteps = np.linspace(0, tstop, tidx)
+    for n in outputNeurons:
+        n.plot(tsteps)
 
 
 if __name__ == "__main__":
