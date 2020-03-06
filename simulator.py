@@ -6,8 +6,6 @@ from scipy.sparse.linalg import splu
 import scipy.sparse
 import math
 
-tstep = 0.001
-
 
 def simulator(modelFile, inputFile):
     (inputNeurons, modelNeurons, outputNeurons,
@@ -35,18 +33,18 @@ def simulator(modelFile, inputFile):
 
     # Initialize output neurons with number of steps
     for n in outputNeurons:
-        n.init_stepcount(1+math.ceil(tstop/tstep))
+        n.init_stepcount(math.ceil(tstop/tstep))
 
     # Prepare state variables
-    v = np.zeros((matSize, 1))+restingPotential
+    v = np.zeros((matSize, 1))+LIFrestingPotential
     tidx = 0
     t = 0
     while t < tstop:
         # Stamp new excitation vector
-        J = J0
+        J = J0.copy()
         for i, n in enumerate(modelNeurons):
             stdpSpiked = spikes[i+len(inputNeurons), 2]
-            J = n.stampCompanionJ(J, spikes, stdpSpiked)
+            J = n.stampCompanionJ(J, v[n.nV], spikes, stdpSpiked)
 
         # Simulation step
         if hasNonlinear:
@@ -59,8 +57,8 @@ def simulator(modelFile, inputFile):
             # TODO: I don't know the best way to decide when input cells spike
             pass  # raise NotImplementedError()
         # TODO: No FN support here.
-        spikes[:, 1:4] = spikes[:, 0:3]
-        spikes[len(inputNeurons):-1, 0] = v > LIFThreshold
+        spikes[:, 1:5] = spikes[:, 0:4]
+        spikes[len(inputNeurons):spikes.shape[0], 0] = v > LIFThreshold
 
         # Write spikes to outputs
         for n in outputNeurons:
