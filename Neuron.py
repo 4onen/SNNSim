@@ -1,10 +1,17 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-LIFrestingPotential = -70e-3
-LIFMembraneResistance = 10e6
-LIFMembraneCapacitance = 200e-12
-LIFThreshold = -60e-3
+LIFRealrestingPotential = -70e-3
+LIFRealMembraneResistance = 10e6
+LIFRealMembraneCapacitance = 200e-12
+LIFRealThreshold = -60e-3
+
+LIFDecayTC = 0.02
+LIFrestingPotential = 6
+LIFMembraneResistance = 1
+LIFMembraneCapacitance = LIFDecayTC/LIFMembraneResistance
+LIFThreshold = 70
+
 tstep = 10e-3
 
 
