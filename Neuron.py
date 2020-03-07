@@ -7,10 +7,10 @@ LIFRealMembraneCapacitance = 200e-12
 LIFRealThreshold = -60e-3
 
 LIFDecayTC = 0.02
-LIFrestingPotential = 6
+LIFrestingPotential = 0
 LIFMembraneResistance = 1
 LIFMembraneCapacitance = LIFDecayTC/LIFMembraneResistance
-LIFThreshold = 70
+LIFThreshold = 7
 
 tstep = 10e-3
 
