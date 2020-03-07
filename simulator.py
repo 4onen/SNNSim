@@ -10,9 +10,8 @@ import math
 def simulator(modelFile, inputFile):
     (inputNeurons, modelNeurons, outputNeurons,
      matSize, spikerCnt) = NetworkParser.readNetworkFile(modelFile)
-    (tstop, frameTimes, frameFreqs, frameData) = InputParser.readInputFile(inputFile)
-    print((inputNeurons, modelNeurons, outputNeurons),
-          (frameTimes, frameFreqs, frameData))
+    (num_tsteps, frameData) = InputParser.readInputFile(inputFile)
+    print((inputNeurons, modelNeurons, outputNeurons))
 
     # Check whether we have any nonlinear neuron models
     hasNonlinear = any(map(lambda n: n.hasNonlinear, modelNeurons))
@@ -33,13 +32,11 @@ def simulator(modelFile, inputFile):
 
     # Initialize output neurons with number of steps
     for n in outputNeurons:
-        n.init_stepcount(math.ceil(tstop/tstep))
+        n.init_stepcount(num_tsteps)
 
     # Prepare state variables
     v = np.zeros((matSize, 1))+LIFrestingPotential
-    tidx = 0
-    t = 0
-    while t < tstop:
+    for tidx in range(num_tsteps):
         # Stamp new excitation vector
         J = J0.copy()
         for i, n in enumerate(modelNeurons):
@@ -52,12 +49,12 @@ def simulator(modelFile, inputFile):
         else:
             v = Ylin.solve(J)
 
+        # Advance spike time
+        spikes[:, 1:5] = spikes[:, 0:4]
         # Calculate step spikes
         for i, input in enumerate(inputNeurons):
-            # TODO: I don't know the best way to decide when input cells spike
-            pass  # raise NotImplementedError()
-        # TODO: No FN support here.
-        spikes[:, 1:5] = spikes[:, 0:4]
+            spikes[i, 0] = frameData[i] >> tidx
+        # TODO: No FN support here. Calculate model spikes
         spikes[len(inputNeurons):spikes.shape[0], 0] = v > LIFThreshold
 
         # Write spikes to outputs
@@ -65,10 +62,9 @@ def simulator(modelFile, inputFile):
             n.add_datapoint(tidx, spikes[:, 0])
 
         # Advance time
-        t += tstep
         tidx += 1
 
-    tsteps = np.linspace(0, tstop, tidx)
+    tsteps = np.linspace(0, num_tsteps*tstep, num_tsteps)
     for n in outputNeurons:
         n.plot(tsteps)
 
