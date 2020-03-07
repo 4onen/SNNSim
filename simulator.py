@@ -33,17 +33,17 @@ def simulator(modelFile, inputFile):
 
     # Initialize output neurons with number of steps
     for n in outputNeurons:
-        n.init_stepcount(math.ceil(tstop/tstep))
+        n.init_stepcount(math.ceil(tstop / tstep))
 
     # Prepare state variables
-    v = np.zeros((matSize, 1))+LIFrestingPotential
+    v = np.zeros((matSize, 1)) + LIFrestingPotential
     tidx = 0
     t = 0
     while t < tstop:
         # Stamp new excitation vector
         J = J0.copy()
         for i, n in enumerate(modelNeurons):
-            stdpSpiked = spikes[i+len(inputNeurons), 2]
+            stdpSpiked = spikes[i + len(inputNeurons), 2]
             J = n.stampCompanionJ(J, v[n.nV], spikes, stdpSpiked)
 
         # Simulation step
