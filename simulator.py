@@ -72,22 +72,6 @@ def simulator(modelFile, inputFile):
     for n in outputNeurons:
         n.plot(tsteps)
 
-def weight_update(self, w, ispike, ospike):
-    # W-current weight of a neuron and the function returns the updated weight
-    # ispike is an array of size 5 with input data from time steps t-4 to t
-    # ospike is the output data at time step t-2
-    if (ospike == 1):
-        if (ispike[1] == 1):
-            w+= 2
-        if (ispike[0] == 1):
-            w+= 1
-        if (ispike[3] == 1):
-            w-= 2
-        if (ispike[4] == 1):
-            w-= 1
-        return w
-    else:
-        return w
 
 if __name__ == "__main__":
     import sys

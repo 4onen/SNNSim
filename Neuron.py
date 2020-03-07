@@ -58,6 +58,20 @@ class ModelNeuron:
     # def stampNonlinearJ(self,J,vguess)
 
 
+def LIF_weight_update(w, ispike):
+    # W-current weight of a neuron and the function returns the updated weight
+    # ispike is an array of size 5 with input data from time steps t-4 to t
+    if (ispike[1] == 1):
+        w += 2
+    if (ispike[0] == 1):
+        w += 1
+    if (ispike[3] == 1):
+        w -= 2
+    if (ispike[4] == 1):
+        w -= 1
+    return w
+
+
 class LIFNeuron(ModelNeuron):
     def __init__(self, inputNeuronIds, nV):
         super().__init__(inputNeuronIds, nV)
@@ -80,7 +94,8 @@ class LIFNeuron(ModelNeuron):
 
     def stampCompanionJ(self, J, vlast, slast, stdpSpiked):
         if stdpSpiked:
-            pass  # TODO: STDP Learning weight vector update
+            for i in range(len(self.w)):
+                self.w[i] = LIF_weight_update(self.w[i], slast[i, :])
 
         if vlast > LIFThreshold:
             vlast = LIFrestingPotential  # Spike reset
