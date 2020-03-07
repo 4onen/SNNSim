@@ -35,7 +35,7 @@ def simulator(modelFile, inputFile):
         n.init_stepcount(num_tsteps)
 
     # Prepare state variables
-    v = np.zeros((matSize, 1))+LIFrestingPotential
+    v = np.zeros(matSize)+LIFrestingPotential
     for tidx in range(num_tsteps):
         # Stamp new excitation vector
         J = J0.copy()
@@ -48,6 +48,7 @@ def simulator(modelFile, inputFile):
             raise NotImplementedError()
         else:
             v = Ylin.solve(J)
+            v.shape = (v.shape[0],)
 
         # Advance spike time
         spikes[:, 1:5] = spikes[:, 0:4]
@@ -75,13 +76,13 @@ def weight_update(self, w, ispike, ospike):
     # ospike is the output data at time step t-2
     if (ospike == 1):
         if (ispike[1] == 1):
-            w+= 2
+            w += 2
         if (ispike[0] == 1):
-            w+= 1
+            w += 1
         if (ispike[3] == 1):
-            w-= 2
+            w -= 2
         if (ispike[4] == 1):
-            w-= 1
+            w -= 1
         return w
     else:
         return w
