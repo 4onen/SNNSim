@@ -1,5 +1,6 @@
 import yaml
 import Neuron
+import numpy as np
 
 
 def readNetwork(data):
@@ -34,7 +35,7 @@ def readNetwork(data):
         elif neuron['model'] == 'LIF':
             inputs = readInputs(neuron, nameNums)
             modelNeurons.append(Neuron.LIFNeuron(
-                readInputs(neuron, nameNums), assignedMatrixIDs))
+                readInputs(neuron, nameNums), assignedMatrixIDs, np.array(neuron['weights'])))
             assignedMatrixIDs += 1
             assignedSpikeIDs += 1
         elif neuron['model'] == 'FN':

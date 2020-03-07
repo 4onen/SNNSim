@@ -80,9 +80,12 @@ def LIF_weight_update(w, ispike):
 
 
 class LIFNeuron(ModelNeuron):
-    def __init__(self, inputNeuronIds, nV):
+    def __init__(self, inputNeuronIds, nV, w=None):
         super().__init__(inputNeuronIds, nV)
-        self.w = np.ones((len(inputNeuronIds), 1))
+        if w is None:
+            self.w = np.ones((len(inputNeuronIds),))
+        else:
+            self.w = w
 
     def __str__(self):
         return 'LIF neuron voltage on '+str(self.nV)+' and inputs '+str(self.inputNeuronIds)
