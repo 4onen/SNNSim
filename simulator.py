@@ -78,7 +78,7 @@ def simulator(model, inputs, training, output):
         # Write spikes to outputs
         if output:
             for n in outputNeurons:
-                n.add_datapoint(tidx, spikes[:, 0])
+                n.add_datapoint(tidx, spikes[:, 0], v)
 
         # Advance time
         tidx += 1

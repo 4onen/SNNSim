@@ -4,15 +4,15 @@ import numpy as np
 
 
 def readNetwork(data):
-    def readInputs(neuron, nameNums):
-        inputs = list()
-        for input in neuron['inputs']:
+    def readInputs(inputs, nameNums):
+        inputIds = list()
+        for input in inputs:
             try:
-                inputs.append(int(input))
+                inputIds.append(int(input))
             except ValueError:
-                inputs.append(nameNums[input])
+                inputIds.append(nameNums[input])
 
-        return inputs
+        return inputIds
 
     inlist = yaml.safe_load(data)
 
@@ -33,23 +33,23 @@ def readNetwork(data):
             inputNeurons.append(Neuron.InputNeuron(i))
             assignedSpikeIDs += 1
         elif neuron['model'] == 'LIF':
-            inputs = readInputs(neuron, nameNums)
+            inputs = readInputs(neuron['inputs'], nameNums)
             modelNeurons.append(Neuron.LIFNeuron(
-                readInputs(neuron, nameNums), assignedMatrixIDs, np.array(neuron['weights'])))
+                inputs, assignedMatrixIDs, np.array(neuron['weights'])))
             assignedMatrixIDs += 1
             assignedSpikeIDs += 1
         elif neuron['model'] == 'FN':
             modelNeurons.append(Neuron.FNNeuron(
-                readInputs(neuron, nameNums), assignedMatrixIDs, assignedMatrixIDs+1))
+                readInputs(neuron['inputs'], nameNums), assignedMatrixIDs, assignedMatrixIDs+1))
             assignedMatrixIDs += 2
             assignedSpikeIDs += 1
         elif neuron['model'] == 'Output':
-            if 'name' in neuron:
-                outputNeurons.append(Neuron.OutputNeuron(
-                    neuron['name'], readInputs(neuron, nameNums)))
-            else:
-                outputNeurons.append(Neuron.OutputNeuron(
-                    'Neuron #'+str(i), readInputs(neuron, nameNums)))
+            name = neuron['name'] if 'name' in neuron.keys()\
+                else 'Neuron #'+str(i)
+            voltageIds = np.array(readInputs(neuron['vinputs'], nameNums))-len(inputNeurons) \
+                if 'vinputs' in neuron.keys() else None
+            outputNeurons.append(Neuron.OutputNeuron(
+                name, readInputs(neuron['inputs'], nameNums), voltageIds))
         else:
             raise KeyError()
 

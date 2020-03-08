@@ -37,7 +37,9 @@
 - model: 'Output'
   name: 'One'
   inputs: ['TheOne']
+  vinputs: ['TheOne']
 
 - model: 'Output'
   name: 'Two'
   inputs: ['TheTwo']
+  vinputs: ['TheTwo']

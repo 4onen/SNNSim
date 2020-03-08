@@ -6,11 +6,11 @@ LIFRealMembraneResistance = 10e6
 LIFRealMembraneCapacitance = 200e-12
 LIFRealThreshold = -60e-3
 
-LIFDecayTC = 0.40455715765
+LIFDecayTC = 0.10455715765
 LIFrestingPotential = 0
-LIFMembraneResistance = 1e6
+LIFMembraneResistance = 1
 LIFMembraneCapacitance = LIFDecayTC/LIFMembraneResistance
-LIFThreshold = 64
+LIFThreshold = 6
 
 tstep = 10e-3
 
@@ -27,10 +27,12 @@ class InputNeuron:
 
 
 class OutputNeuron:
-    def __init__(self, name, inputNeuronIds):
+    def __init__(self, name, inputNeuronIds, voltageIds=None):
         self.name = name
         self.inputNeuronIds = inputNeuronIds
+        self.voltageIds = voltageIds
         self.data = None
+        self.vdata = None
 
     def __str__(self):
         dat = 'no data' if self.data is None else \
@@ -42,12 +44,18 @@ class OutputNeuron:
 
     def init_stepcount(self, tstepcount):
         self.data = np.ndarray(tstepcount)
+        if self.voltageIds is not None:
+            self.vdata = np.ndarray(tstepcount)
 
-    def add_datapoint(self, i, v):
-        self.data[i] = sum(v[self.inputNeuronIds])
+    def add_datapoint(self, i, s, v):
+        self.data[i] = sum(s[self.inputNeuronIds])
+        if self.voltageIds is not None:
+            self.vdata[i] = sum(v[self.voltageIds])
 
     def plot(self, tsteps):
         plt.plot(tsteps, self.data)
+        if self.voltageIds is not None:
+            plt.plot(tsteps, self.vdata)
         plt.title(self.name)
         plt.show()
 
