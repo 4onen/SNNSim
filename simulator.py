@@ -14,14 +14,14 @@ def oneSim(modelFile, inputFile):
     simulator(model, inputs, True, True)
 
 
-def trainer(modelFile, trainingFile, testingFile, trainingEpochs):
+def trainer(modelFile, trainingFile, testingFile, trainingEpochs, plotTraining=False):
     model = NetworkParser.readNetworkFile(modelFile)
     trainingInput = InputParser.readInputFile(trainingFile)
 
     print(model[0], model[1], model[2])
 
     for i in range(trainingEpochs):
-        simulator(model, trainingInput, True, False)
+        simulator(model, trainingInput, True, plotTraining)
         if (i+1) % 5 == 0:
             print(f'Epoch {i+1} completed.')
 
@@ -98,6 +98,8 @@ if __name__ == "__main__":
         oneSim(sys.argv[1], sys.argv[2])
     elif len(sys.argv) is 5:
         trainer(sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4]))
+    elif len(sys.argv) is 6:
+        trainer(sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4]), True)
     else:
         print(
             f'Usage: {sys.argv[0]} MODELFILE INPUTFILE\n\tor: {sys.argv[0]} MODELFILE TRAININGFILE TESTINGFILE EPOCHS')
