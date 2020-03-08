@@ -34,8 +34,12 @@ def readNetwork(data):
             assignedSpikeIDs += 1
         elif neuron['model'] == 'LIF':
             inputs = readInputs(neuron['inputs'], nameNums)
+            weights = np.array(
+                neuron['weights']) if 'weights' in neuron.keys() else None
+            latInhib = np.array(readInputs(neuron['inhibits'], nameNums))-len(inputNeurons) \
+                if 'inhibits' in neuron.keys() else []
             modelNeurons.append(Neuron.LIFNeuron(
-                inputs, assignedMatrixIDs, np.array(neuron['weights'])))
+                inputs, assignedMatrixIDs, latInhib, weights))
             assignedMatrixIDs += 1
             assignedSpikeIDs += 1
         elif neuron['model'] == 'FN':
@@ -46,10 +50,8 @@ def readNetwork(data):
         elif neuron['model'] == 'Output':
             name = neuron['name'] if 'name' in neuron.keys()\
                 else 'Neuron #'+str(i)
-            voltageIds = np.array(readInputs(neuron['vinputs'], nameNums))-len(inputNeurons) \
-                if 'vinputs' in neuron.keys() else None
             outputNeurons.append(Neuron.OutputNeuron(
-                name, readInputs(neuron['inputs'], nameNums), voltageIds))
+                name, readInputs(neuron['inputs'], nameNums), len(inputNeurons)))
         else:
             raise KeyError()
 

@@ -27,10 +27,11 @@ class InputNeuron:
 
 
 class OutputNeuron:
-    def __init__(self, name, inputNeuronIds, voltageIds=None):
+    def __init__(self, name, inputNeuronIds, modelOffset):
         self.name = name
         self.inputNeuronIds = inputNeuronIds
-        self.voltageIds = voltageIds
+        self.modelNeuronIds = list(map(lambda x: x-modelOffset,
+                                       filter(lambda x: x >= modelOffset, inputNeuronIds)))
         self.data = None
         self.vdata = None
 
@@ -44,27 +45,33 @@ class OutputNeuron:
 
     def init_stepcount(self, tstepcount):
         self.data = np.ndarray(tstepcount)
-        if self.voltageIds is not None:
+        if len(self.modelNeuronIds) > 0:
             self.vdata = np.ndarray(tstepcount)
 
-    def add_datapoint(self, i, s, v):
-        self.data[i] = sum(s[self.inputNeuronIds])
-        if self.voltageIds is not None:
-            self.vdata[i] = sum(v[self.voltageIds])
+    def add_datapoint(self, i, s, v, inhib):
+        self.data[i] = sum(s[self.inputNeuronIds])\
+            - sum(inhib[self.modelNeuronIds])
+        if len(self.modelNeuronIds) > 0:
+            self.vdata[i] = sum(v[self.modelNeuronIds])
 
     def plot(self, tsteps):
         plt.plot(tsteps, self.data)
-        if self.voltageIds is not None:
+        if len(self.modelNeuronIds) > 0:
             plt.plot(tsteps, self.vdata)
         plt.title(self.name)
         plt.show()
 
 
 class ModelNeuron:
-    def __init__(self, inputNeuronIds, nV, hasNonlinear=False):
+    def __init__(self, inputNeuronIds, nV, latInhib=[], w=None, hasNonlinear=False):
         self.inputNeuronIds = inputNeuronIds
         self.nV = nV
         self.hasNonlinear = hasNonlinear
+        if w is None:
+            self.w = np.ones((len(inputNeuronIds),))
+        else:
+            self.w = np.array(w, dtype=float)
+        self.latInhib = latInhib
 
     # def stampLinearY(self,Y)
     # def stampLinearJ(self,J)
@@ -90,12 +97,8 @@ def LIF_weight_update(w, ispike, ospike):
 
 
 class LIFNeuron(ModelNeuron):
-    def __init__(self, inputNeuronIds, nV, w=None):
-        super().__init__(inputNeuronIds, nV)
-        if w is None:
-            self.w = np.ones((len(inputNeuronIds),))
-        else:
-            self.w = np.array(w, dtype=float)
+    def __init__(self, inputNeuronIds, nV, latInhib=[], w=None):
+        super().__init__(inputNeuronIds, nV, latInhib, w)
         self.spiked = np.zeros((3,), bool)
 
     def __str__(self):
@@ -113,10 +116,10 @@ class LIFNeuron(ModelNeuron):
         J[self.nV] += LIFrestingPotential/LIFMembraneResistance
         return J
 
-    def stampCompanionJ(self, J, vlast, slast, training):
+    def stampCompanionJ(self, J, vlast, slast, training, inhibited):
         self.spiked[1:3] = self.spiked[0:2]
         self.spiked[0] = vlast > LIFThreshold
-        if self.spiked[0]:
+        if inhibited or self.spiked[0]:
             vlast = LIFrestingPotential  # Spike reset
 
         if training:

@@ -37,6 +37,7 @@ def simulator(model, inputs, training, output):
 
     # Allocate storage vectors
     spikes = np.zeros((spikerCnt, 5), dtype=bool)
+    inhibitions = np.zeros(len(modelNeurons), dtype=bool)
     Y0 = scipy.sparse.lil_matrix((matSize, matSize))
     J0 = np.zeros((matSize, 1))
 
@@ -57,10 +58,17 @@ def simulator(model, inputs, training, output):
     # Prepare state variables
     v = np.zeros(matSize)+LIFrestingPotential
     for tidx in range(num_tsteps):
+        # Calculate lateral inhibitions
+        inhibitions[:] = False
+        for i, n in enumerate(modelNeurons):
+            if spikes[len(inputNeurons)+i, 0] and len(n.latInhib) > 0:
+                for inhib in n.latInhib:
+                    inhibitions[inhib] = True
+
         # Stamp new excitation vector
         J = J0.copy()
         for i, n in enumerate(modelNeurons):
-            J = n.stampCompanionJ(J, v[n.nV], spikes, training)
+            J = n.stampCompanionJ(J, v[n.nV], spikes, training, inhibitions[i])
 
         # Simulation step
         if hasNonlinear:
@@ -70,7 +78,7 @@ def simulator(model, inputs, training, output):
             v.shape = (v.shape[0],)
 
         # Advance spike time
-        spikes[:, 1:5] = spikes[:, 0:4]
+        spikes[:, 1:] = spikes[:, :(spikes.shape[1]-1)]
         # Calculate step spikes
         for i, input in enumerate(inputNeurons):
             spikes[i, 0] = frameData[tidx, i]
@@ -80,7 +88,7 @@ def simulator(model, inputs, training, output):
         # Write spikes to outputs
         if output:
             for n in outputNeurons:
-                n.add_datapoint(tidx, spikes[:, 0], v)
+                n.add_datapoint(tidx, spikes[:, 0], v, inhibitions)
 
         # Advance time
         tidx += 1
