@@ -58,8 +58,7 @@ def simulator(model, inputs, training, output):
         # Stamp new excitation vector
         J = J0.copy()
         for i, n in enumerate(modelNeurons):
-            stdpSpiked = training and spikes[i + len(inputNeurons), 2]
-            J = n.stampCompanionJ(J, v[n.nV], spikes, stdpSpiked)
+            J = n.stampCompanionJ(J, v[n.nV], spikes, training)
 
         # Simulation step
         if hasNonlinear:

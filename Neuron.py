@@ -6,11 +6,11 @@ LIFRealMembraneResistance = 10e6
 LIFRealMembraneCapacitance = 200e-12
 LIFRealThreshold = -60e-3
 
-LIFDecayTC = 0.02
+LIFDecayTC = 0.40455715765
 LIFrestingPotential = 0
-LIFMembraneResistance = 1
+LIFMembraneResistance = 1e6
 LIFMembraneCapacitance = LIFDecayTC/LIFMembraneResistance
-LIFThreshold = 7
+LIFThreshold = 64
 
 tstep = 10e-3
 
@@ -70,15 +70,15 @@ def LIF_weight_update(w, ispike, ospike):
     # ispike is an array of size 5 with input data from time steps t-4 to t
     if(ispike[0] == 1):
         if (ospike[1] == 1):
-            w-= 2
+            w -= 2
         if (ospike[2] == 1):
-            w-= 1
+            w -= 1
     if(ospike[0] == 1):
         if (ispike[1] == 1):
-            w+= 2
-        if (ispike[1] == 1):
-            w+= 1
-    return np.clip(w,0,3)
+            w += 2
+        if (ispike[2] == 1):
+            w += 1
+    return np.clip(w, 0, 3)
 
 
 class LIFNeuron(ModelNeuron):
@@ -87,7 +87,8 @@ class LIFNeuron(ModelNeuron):
         if w is None:
             self.w = np.ones((len(inputNeuronIds),))
         else:
-            self.w = w
+            self.w = np.array(w, dtype=float)
+        self.spiked = np.zeros((3,), bool)
 
     def __str__(self):
         return 'LIF neuron voltage on '+str(self.nV)+' and inputs '+str(self.inputNeuronIds)
@@ -104,13 +105,16 @@ class LIFNeuron(ModelNeuron):
         J[self.nV] += LIFrestingPotential/LIFMembraneResistance
         return J
 
-    def stampCompanionJ(self, J, vlast, slast, stdpSpiked):
-        if stdpSpiked:
-            for i in range(len(self.w)):
-                self.w[i] = LIF_weight_update(self.w[i], slast[i, :])
-
-        if vlast > LIFThreshold:
+    def stampCompanionJ(self, J, vlast, slast, training):
+        self.spiked[1:3] = self.spiked[0:2]
+        self.spiked[0] = vlast > LIFThreshold
+        if self.spiked[0]:
             vlast = LIFrestingPotential  # Spike reset
+
+        if training:
+            for i in range(len(self.w)):
+                self.w[i] = LIF_weight_update(
+                    self.w[i], slast[i, :], self.spiked)
 
         J[self.nV] += np.dot(slast[self.inputNeuronIds, 0], self.w)  # STDP
         J[self.nV] += LIFMembraneCapacitance/tstep * vlast  # Capacitor
