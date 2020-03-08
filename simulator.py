@@ -20,8 +20,10 @@ def trainer(modelFile, trainingFile, testingFile, trainingEpochs):
 
     print(model[0], model[1], model[2])
 
-    for _ in range(trainingEpochs):
+    for i in range(trainingEpochs):
         simulator(model, trainingInput, True, False)
+        if (i+1) % 5 == 0:
+            print(f'Epoch {i+1} completed.')
 
     testingInput = InputParser.readInputFile(testingFile)
     simulator(model, testingInput, False, True)
