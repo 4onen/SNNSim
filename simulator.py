@@ -7,12 +7,29 @@ import scipy.sparse
 import math
 
 
-def simulator(modelFile, inputFile):
-    (inputNeurons, modelNeurons, outputNeurons,
-     matSize, spikerCnt) = NetworkParser.readNetworkFile(modelFile)
-    (num_tsteps, frameData) = InputParser.readInputFile(inputFile)
-    print((inputNeurons, modelNeurons, outputNeurons))
+def oneSim(modelFile, inputFile):
+    model = NetworkParser.readNetworkFile(modelFile)
+    inputs = InputParser.readInputFile(inputFile)
+    print(model[0], model[1], model[2])
+    simulator(model, inputs, True, True)
 
+
+def trainer(modelFile, trainingFile, testingFile, trainingEpochs):
+    model = NetworkParser.readNetworkFile(modelFile)
+    trainingInput = InputParser.readInputFile(trainingFile)
+
+    print(model[0], model[1], model[2])
+
+    for _ in range(trainingEpochs):
+        simulator(model, trainingInput, True, False)
+
+    testingInput = InputParser.readInputFile(testingFile)
+    simulator(model, testingInput, False, True)
+
+
+def simulator(model, inputs, training, output):
+    inputNeurons, modelNeurons, outputNeurons, matSize, spikerCnt = model
+    num_tsteps, frameData = inputs
     # Check whether we have any nonlinear neuron models
     hasNonlinear = any(map(lambda n: n.hasNonlinear, modelNeurons))
 
@@ -31,8 +48,9 @@ def simulator(modelFile, inputFile):
         Ylin = splu(Y0.tocsc())
 
     # Initialize output neurons with number of steps
-    for n in outputNeurons:
-        n.init_stepcount(num_tsteps)
+    if output:
+        for n in outputNeurons:
+            n.init_stepcount(num_tsteps)
 
     # Prepare state variables
     v = np.zeros(matSize)+LIFrestingPotential
@@ -40,7 +58,7 @@ def simulator(modelFile, inputFile):
         # Stamp new excitation vector
         J = J0.copy()
         for i, n in enumerate(modelNeurons):
-            stdpSpiked = spikes[i + len(inputNeurons), 2]
+            stdpSpiked = training and spikes[i + len(inputNeurons), 2]
             J = n.stampCompanionJ(J, v[n.nV], spikes, stdpSpiked)
 
         # Simulation step
@@ -59,22 +77,27 @@ def simulator(modelFile, inputFile):
         spikes[len(inputNeurons):spikes.shape[0], 0] = v > LIFThreshold
 
         # Write spikes to outputs
-        for n in outputNeurons:
-            n.add_datapoint(tidx, spikes[:, 0])
+        if output:
+            for n in outputNeurons:
+                n.add_datapoint(tidx, spikes[:, 0])
 
         # Advance time
         tidx += 1
 
-    tsteps = np.linspace(0, num_tsteps*tstep, num_tsteps)
-    for n in outputNeurons:
-        n.plot(tsteps)
+    if output:
+        tsteps = np.linspace(0, num_tsteps*tstep, num_tsteps)
+        for n in outputNeurons:
+            n.plot(tsteps)
 
 
 if __name__ == "__main__":
     import sys
 
-    if len(sys.argv) != 3:
-        print(f'Usage: {sys.argv[0]} MODELFILE INPUTFILE')
-        sys.exit(len(sys.argv) < 2)
-
-    simulator(sys.argv[1], sys.argv[2])
+    if len(sys.argv) is 3:
+        oneSim(sys.argv[1], sys.argv[2])
+    elif len(sys.argv) is 5:
+        trainer(sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4]))
+    else:
+        print(
+            f'Usage: {sys.argv[0]} MODELFILE INPUTFILE\n\tor: {sys.argv[0]} MODELFILE TRAININGFILE TESTINGFILE EPOCHS')
+        sys.exit(1)
