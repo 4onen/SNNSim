@@ -23,8 +23,8 @@ def frame2dict(frame):
 
 
 def frames2yaml(frames):
-    file = open('generatedInput.yaml','w')
-    return yaml.dump(list(map(frame2dict, frames)),file)
+    file = open('benchmarks/generatedInput.yaml', 'w')
+    return yaml.dump(list(map(frame2dict, frames)), file)
 
 
 frames2yaml([[1, 1, 1, 0, 0,
