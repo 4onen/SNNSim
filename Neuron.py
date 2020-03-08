@@ -10,7 +10,9 @@ LIFDecayTC = 0.10455715765
 LIFrestingPotential = 0
 LIFMembraneResistance = 1
 LIFMembraneCapacitance = LIFDecayTC/LIFMembraneResistance
-LIFThreshold = 6
+LIFThreshold = 5.5
+
+LIFLearningRate = 0.1
 
 tstep = 10e-3
 
@@ -85,14 +87,14 @@ def LIF_weight_update(w, ispike, ospike):
     # ispike is an array of size 5 with input data from time steps t-4 to t
     if(ispike[0] == 1):
         if (ospike[1] == 1):
-            w -= 2
+            w -= 2*LIFLearningRate
         if (ospike[2] == 1):
-            w -= 1
+            w -= 1*LIFLearningRate
     if(ospike[0] == 1):
         if (ispike[1] == 1):
-            w += 2
+            w += 2*LIFLearningRate
         if (ispike[2] == 1):
-            w += 1
+            w += 1*LIFLearningRate
     return np.clip(w, 0, 3)
 
 
