@@ -9,13 +9,14 @@ import yaml
 
 
 seqSize = 20
-
+sequence1 = '11001100110011001100'
+sequence2 = '00000000000000000000'
 
 def pixel2seq(num):
     if num == 1:
-        return bin(0b01010101010101010101)
+        return sequence1*10
     else:
-        return bin(0b00000000000000000000)
+        return sequence2*10
 
 
 def frame2dict(frame):
