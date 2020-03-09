@@ -44,8 +44,8 @@ def readNetwork(data):
             assignedSpikeIDs += 1
         elif neuron['model'] == 'FN':
             modelNeurons.append(Neuron.FNNeuron(
-                readInputs(neuron['inputs'], nameNums), assignedMatrixIDs, assignedMatrixIDs+1))
-            assignedMatrixIDs += 2
+                readInputs(neuron['inputs'], nameNums), assignedMatrixIDs))
+            assignedMatrixIDs += 1
             assignedSpikeIDs += 1
         elif neuron['model'] == 'Output':
             name = neuron['name'] if 'name' in neuron.keys()\

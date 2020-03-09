@@ -15,7 +15,7 @@ def pixel2seq(num):
     if num == 1:
         return bin(0b01010101010101010101)
     else:
-        return bin(0b01000000100100000010)
+        return bin(0b00000000000000000000)
 
 
 def frame2dict(frame):

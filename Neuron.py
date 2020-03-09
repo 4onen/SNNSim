@@ -6,11 +6,11 @@ LIFRealMembraneResistance = 10e6
 LIFRealMembraneCapacitance = 200e-12
 LIFRealThreshold = -60e-3
 
-LIFDecayTC = 0.10455715765
+LIFDecayTC = 0.01
 LIFrestingPotential = 0
 LIFMembraneResistance = 1
 LIFMembraneCapacitance = LIFDecayTC/LIFMembraneResistance
-LIFThreshold = 5.5
+LIFThreshold = 10
 
 LIFLearningRate = 0.1
 
@@ -77,9 +77,7 @@ class ModelNeuron:
 
     # def stampLinearY(self,Y)
     # def stampLinearJ(self,J)
-    # def stampCompanionJ(self,J,vlast,slast,stdpSpiked)
-    # def stampNonlinearY(self,Y,vguess)
-    # def stampNonlinearJ(self,J,vguess)
+    # def stampCompanionJ(self,J,vlast,slast,training,inhibited)
 
 
 def LIF_weight_update(w, ispike, ospike):
@@ -119,8 +117,10 @@ class LIFNeuron(ModelNeuron):
         return J
 
     def stampCompanionJ(self, J, vlast, slast, training, inhibited):
+        # TODO: This needs to get stretched somehow
         self.spiked[1:3] = self.spiked[0:2]
-        self.spiked[0] = vlast > LIFThreshold
+        # TODO: This needs to get reset at some point somehow.
+        self.spiked[0] |= vlast > LIFThreshold
         if inhibited or self.spiked[0]:
             vlast = LIFrestingPotential  # Spike reset
 
@@ -135,28 +135,28 @@ class LIFNeuron(ModelNeuron):
 
 
 class FNNeuron(ModelNeuron):
-    def __init__(self, inputNeuronIds, nV, nW):
-        super().__init__(inputNeuronIds, nV, True)
-        self.nV = nV
-        self.nW = nW
+    def __init__(self, inputNeuronIds, nV):
+        super().__init__(inputNeuronIds, nV)
+        self.W = 0.8640897783246109
 
     def __str__(self):
         return 'FN neuron spiking on '+str(self.nV)+' and inputs '+str(self.inputNeuronIds)
 
     def __repr__(self):
-        return 'FN nV:'+str(self.nV)+' nW:'+str(self.nW)+' inputs:'+str(self.inputNeuronIds)
+        return 'FN nV:'+str(self.nV)+' inputs:'+str(self.inputNeuronIds)
 
     def stampLinearY(self, Y):
-        raise NotImplementedError()
+        Y[self.nV, self.nV] = 1
+        return Y
 
     def stampLinearJ(self, J):
-        raise NotImplementedError()
+        return J
 
-    def stampCompanionJ(self, J, slast):
-        raise NotImplementedError()
-
-    def stampNonlinearY(self, Y, vguess):
-        raise NotImplementedError()
-
-    def stampNonlinearJ(self, J, vguess):
-        raise NotImplementedError()
+    def stampCompanionJ(self, J, vlast, slast, training, inhibited):
+        I = np.dot(slast[self.inputNeuronIds, 0], self.w)  # STDP Weights
+        dV = vlast-vlast*vlast*vlast/3-self.W+I
+        dW = 0.08*(vlast+0.7-0.8*self.W)
+        J[self.nV] += tstep*dV
+        self.W += tstep*dW
+        print(self.W)
+        return J

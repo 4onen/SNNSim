@@ -5,6 +5,7 @@ from Neuron import *
 from scipy.sparse.linalg import splu
 import scipy.sparse
 import math
+import matplotlib.pyplot as plt
 
 
 def oneSim(modelFile, inputFile):
@@ -27,11 +28,16 @@ def trainer(modelFile, trainingFile, testingFile, trainingEpochs, plotTraining=F
 
     testingInput = InputParser.readInputFile(testingFile)
     simulator(model, testingInput, False, True)
+    for i, n in enumerate(model[1]):
+        plt.imshow(np.reshape(n.w, (5, 5)))
+        plt.title(i+1)
+        plt.show()
 
 
 def simulator(model, inputs, training, output):
     inputNeurons, modelNeurons, outputNeurons, matSize, spikerCnt = model
     num_tsteps, frameData = inputs
+    num_tsteps *= 2
     # Check whether we have any nonlinear neuron models
     hasNonlinear = any(map(lambda n: n.hasNonlinear, modelNeurons))
 
@@ -68,7 +74,8 @@ def simulator(model, inputs, training, output):
         # Stamp new excitation vector
         J = J0.copy()
         for i, n in enumerate(modelNeurons):
-            J = n.stampCompanionJ(J, v[n.nV], spikes, training, inhibitions[i])
+            J = n.stampCompanionJ(
+                J, v[n.nV], spikes, training and tidx % 2 == 1, inhibitions[i])
 
         # Simulation step
         if hasNonlinear:
@@ -78,12 +85,14 @@ def simulator(model, inputs, training, output):
             v.shape = (v.shape[0],)
 
         # Advance spike time
-        spikes[:, 1:] = spikes[:, :(spikes.shape[1]-1)]
-        # Calculate step spikes
-        for i, input in enumerate(inputNeurons):
-            spikes[i, 0] = frameData[tidx, i]
+        if tidx % 2 == 0:
+            spikes[:, 1:] = spikes[:, :(spikes.shape[1]-1)]
+            spikes[:, 0] = False
+            # Calculate step spikes
+            for i, input in enumerate(inputNeurons):
+                spikes[i, 0] = frameData[tidx // 10, i]
         # TODO: No FN support here. Calculate model spikes
-        spikes[len(inputNeurons):spikes.shape[0], 0] = v > LIFThreshold
+        spikes[len(inputNeurons):spikes.shape[0], 0] |= v > LIFThreshold
 
         # Write spikes to outputs
         if output:
