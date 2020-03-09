@@ -37,7 +37,7 @@ def trainer(modelFile, trainingFile, testingFile, trainingEpochs, plotTraining=F
 def simulator(model, inputs, training, output):
     inputNeurons, modelNeurons, outputNeurons, matSize, spikerCnt = model
     num_tsteps, frameData = inputs
-    num_tsteps *= 2
+    num_tsteps *= 1 #changed from 2 to 1 (veena)
     # Check whether we have any nonlinear neuron models
     hasNonlinear = any(map(lambda n: n.hasNonlinear, modelNeurons))
 
