@@ -37,7 +37,6 @@ def trainer(modelFile, trainingFile, testingFile, trainingEpochs, plotTraining=F
 def simulator(model, inputs, training, output):
     inputNeurons, modelNeurons, outputNeurons, matSize, spikerCnt = model
     num_tsteps, frameData = inputs
-    num_tsteps *= 1 #changed from 2 to 1 (veena)
     # Check whether we have any nonlinear neuron models
     hasNonlinear = any(map(lambda n: n.hasNonlinear, modelNeurons))
 
@@ -75,7 +74,7 @@ def simulator(model, inputs, training, output):
         J = J0.copy()
         for i, n in enumerate(modelNeurons):
             J = n.stampCompanionJ(
-                J, v[n.nV], spikes, training and tidx % 2 == 1, inhibitions[i])
+                J, v[n.nV], spikes, training, inhibitions[i])
 
         # Simulation step
         if hasNonlinear:
@@ -85,12 +84,11 @@ def simulator(model, inputs, training, output):
             v.shape = (v.shape[0],)
 
         # Advance spike time
-        if tidx % 2 == 0:
-            spikes[:, 1:] = spikes[:, :(spikes.shape[1]-1)]
-            spikes[:, 0] = False
-            # Calculate step spikes
-            for i, input in enumerate(inputNeurons):
-                spikes[i, 0] = frameData[tidx // 10, i]
+        spikes[:, 1:] = spikes[:, :(spikes.shape[1]-1)]
+        spikes[:, 0] = False
+        # Calculate step spikes
+        for i, input in enumerate(inputNeurons):
+            spikes[i, 0] = frameData[tidx, i]
         # TODO: No FN support here. Calculate model spikes
         spikes[len(inputNeurons):spikes.shape[0], 0] |= v > LIFThreshold
 

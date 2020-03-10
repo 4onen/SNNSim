@@ -121,6 +121,7 @@ class LIFNeuron(ModelNeuron):
         self.spiked[1:3] = self.spiked[0:2]
         # TODO: This needs to get reset at some point somehow.
         self.spiked[0] |= vlast > LIFThreshold
+
         if inhibited or self.spiked[0]:
             vlast = LIFrestingPotential  # Spike reset
 
