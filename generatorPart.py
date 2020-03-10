@@ -8,9 +8,10 @@ import yaml
 #     return num
 
 
-seqSize = 20
+seqSize = 200
 sequence1 = '11001100110011001100'
 sequence2 = '00000000000000000000'
+
 
 def pixel2seq(num):
     if num == 1:
