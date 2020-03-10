@@ -4,6 +4,7 @@
 - model: 'LIF'
   name: 'TheOne'
   inputs: ['TheInput']
+  weights: [10]
 
 - model: 'Output'
   inputs: ['TheOne']

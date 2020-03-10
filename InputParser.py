@@ -2,11 +2,11 @@ import yaml
 import numpy as np
 
 
-def readNeuronSeq(s):
+def readNeuronSeq(s, i):
     if isinstance(s, int):
-        return s
+        return bool((s >> i) & 1)
     else:
-        return int(s, 2)
+        return s[i] == '1'
 
 
 def readInput(data):
@@ -16,7 +16,7 @@ def readInput(data):
     num_neurons = len(indat[0]['data'])
     frameDat = np.ndarray((num_frames, num_neurons), dtype=bool)
     for neuronIdx in range(num_neurons):
-        frameDat[:, neuronIdx] = [bool((readNeuronSeq(im['data'][neuronIdx]) >> (im['inputs']-tidx)) & 1)
+        frameDat[:, neuronIdx] = [readNeuronSeq(im['data'][neuronIdx], im['inputs']-tidx)
                                   for im in indat for tidx in range(im['inputs'])]
     return (num_frames, frameDat)
 
