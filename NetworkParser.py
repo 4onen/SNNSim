@@ -39,12 +39,12 @@ def readNetwork(data):
             latInhib = np.array(readInputs(neuron['inhibits'], nameNums))-len(inputNeurons) \
                 if 'inhibits' in neuron.keys() else []
             modelNeurons.append(Neuron.LIFNeuron(
-                inputs, assignedMatrixIDs, latInhib, weights))
+                inputs, assignedMatrixIDs, assignedSpikeIDs, latInhib, weights))
             assignedMatrixIDs += 1
             assignedSpikeIDs += 1
         elif neuron['model'] == 'FN':
             modelNeurons.append(Neuron.FNNeuron(
-                readInputs(neuron['inputs'], nameNums), assignedMatrixIDs))
+                readInputs(neuron['inputs'], nameNums), assignedMatrixIDs, assignedSpikeIDs))
             assignedMatrixIDs += 1
             assignedSpikeIDs += 1
         elif neuron['model'] == 'Output':

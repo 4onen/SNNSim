@@ -65,9 +65,10 @@ class OutputNeuron:
 
 
 class ModelNeuron:
-    def __init__(self, inputNeuronIds, nV, latInhib=[], w=None, hasNonlinear=False):
+    def __init__(self, inputNeuronIds, nV, nSpike, latInhib=[], w=None, hasNonlinear=False):
         self.inputNeuronIds = inputNeuronIds
         self.nV = nV
+        self.nSpike = nSpike
         self.hasNonlinear = hasNonlinear
         if w is None:
             self.w = np.ones((len(inputNeuronIds),))
@@ -97,9 +98,8 @@ def LIF_weight_update(w, ispike, ospike):
 
 
 class LIFNeuron(ModelNeuron):
-    def __init__(self, inputNeuronIds, nV, latInhib=[], w=None):
-        super().__init__(inputNeuronIds, nV, latInhib, w)
-        self.spiked = np.zeros((3,), bool)
+    def __init__(self, inputNeuronIds, nV, nSpike, latInhib=[], w=None):
+        super().__init__(inputNeuronIds, nV, nSpike, latInhib, w)
 
     def __str__(self):
         return 'LIF neuron voltage on '+str(self.nV)+' and inputs '+str(self.inputNeuronIds)
@@ -117,18 +117,13 @@ class LIFNeuron(ModelNeuron):
         return J
 
     def stampCompanionJ(self, J, vlast, slast, training, inhibited):
-        # TODO: This needs to get stretched somehow
-        self.spiked[1:3] = self.spiked[0:2]
-        # TODO: This needs to get reset at some point somehow.
-        self.spiked[0] |= vlast > LIFThreshold
-
-        if inhibited or self.spiked[0]:
+        if inhibited or slast[self.nSpike, 0]:
             vlast = LIFrestingPotential  # Spike reset
 
         if training:
             for i in range(len(self.w)):
                 self.w[i] = LIF_weight_update(
-                    self.w[i], slast[i, :], self.spiked)
+                    self.w[i], slast[i, :], slast[self.nSpike, :])
 
         J[self.nV] += np.dot(slast[self.inputNeuronIds, 0], self.w)  # STDP
         J[self.nV] += LIFMembraneCapacitance/tstep * vlast  # Capacitor
@@ -136,8 +131,8 @@ class LIFNeuron(ModelNeuron):
 
 
 class FNNeuron(ModelNeuron):
-    def __init__(self, inputNeuronIds, nV):
-        super().__init__(inputNeuronIds, nV)
+    def __init__(self, inputNeuronIds, nV, nSpike):
+        super().__init__(inputNeuronIds, nV, nSpike)
         self.W = 0.8640897783246109
 
     def __str__(self):
