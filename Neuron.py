@@ -93,7 +93,7 @@ def LIF_weight_update(w, ispike, ospike):
             w += 2*LIFLearningRate
         if (ispike[2] == 1):
             w += 1*LIFLearningRate
-    return np.clip(w, 0, 3)
+    return np.clip(w, 0, 6)
 
 
 class LIFNeuron(ModelNeuron):
