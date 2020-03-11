@@ -14,7 +14,7 @@ LIFThreshold = 10
 
 LIFLearningRate = 0.1
 
-tstep = 10e-3
+tstep = 1e-3
 
 
 class InputNeuron:
