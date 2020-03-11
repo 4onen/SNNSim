@@ -85,12 +85,11 @@ def simulator(model, inputs, training, output):
 
         # Advance spike time
         spikes[:, 1:] = spikes[:, :(spikes.shape[1]-1)]
-        spikes[:, 0] = False
         # Calculate step spikes
         for i, input in enumerate(inputNeurons):
             spikes[i, 0] = frameData[tidx, i]
         # TODO: No FN support here. Calculate model spikes
-        spikes[len(inputNeurons):spikes.shape[0], 0] |= v > LIFThreshold
+        spikes[len(inputNeurons):spikes.shape[0], 0] = v > LIFThreshold
 
         # Write spikes to outputs
         if output:
