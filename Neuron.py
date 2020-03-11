@@ -57,9 +57,9 @@ class OutputNeuron:
             self.vdata[i] = sum(v[self.modelNeuronIds])
 
     def plot(self, tsteps):
-        plt.plot(tsteps, self.data)
         if len(self.modelNeuronIds) > 0:
-            plt.plot(tsteps, self.vdata)
+            plt.plot(tsteps, self.vdata, 'y-')
+        plt.plot(tsteps, self.data, 'b-')
         plt.title(self.name)
         plt.show()
 
@@ -94,6 +94,8 @@ def LIF_weight_update(w, ispike, ospike):
             w += 2*LIFLearningRate
         if (ispike[2] == 1):
             w += 1*LIFLearningRate
+        # if (ispike[2] == 1):
+        #    w += 0.25*LIFLearningRate
     return np.clip(w, 0, 6)
 
 
