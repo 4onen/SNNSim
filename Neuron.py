@@ -130,6 +130,27 @@ class LIFNeuron(ModelNeuron):
         return J
 
 
+def negativeXOR(Iin):
+    V_I = LIFThreshold*1.3
+    return (Iin-V_I*np.exp(0.1*(V_I-Iin)))*np.heaviside(Iin-V_I, 1)
+
+
+class LIFXorNeuron(LIFNeuron):
+    def __init__(self, inputNeuronIds, nV, nSpike, latInhib=[], w=None):
+        super().__init__(inputNeuronIds, nV, nSpike, latInhib, w)
+
+    def __str__(self):
+        return 'LIF neuron voltage on '+str(self.nV)+' and inputs '+str(self.inputNeuronIds)
+
+    def __repr__(self):
+        return 'LIF nV:'+str(self.nV)+' inputs:'+str(self.inputNeuronIds)
+
+    def stampCompanionJ(self, J, vlast, slast, training, inhibited):
+        super().stampCompanionJ(J, vlast, slast, training, inhibited)
+        J[self.nV] -= negativeXOR(np.dot(slast[self.inputNeuronIds, 0], self.w))
+        return J
+
+
 class FNNeuron(ModelNeuron):
     def __init__(self, inputNeuronIds, nV, nSpike, w=None):
         super().__init__(inputNeuronIds, nV, nSpike, [], w)
