@@ -16,7 +16,7 @@ def readInput(data):
     num_neurons = len(indat[0]['data'])
     frameDat = np.ndarray((num_frames, num_neurons), dtype=bool)
     for neuronIdx in range(num_neurons):
-        frameDat[:, neuronIdx] = [readNeuronSeq(im['data'][neuronIdx], im['inputs']-tidx)
+        frameDat[:, neuronIdx] = [readNeuronSeq(im['data'][neuronIdx], im['inputs']-tidx-1)
                                   for im in indat for tidx in range(im['inputs'])]
     return (num_frames, frameDat)
 
