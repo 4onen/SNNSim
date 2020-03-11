@@ -90,9 +90,9 @@ def LIF_weight_update(w, ispike, ospike):
         if (ospike[2] == 1):
             w -= 1*LIFLearningRate
     if(ospike[0] == 1):
-        if (ispike[1] == 1):
+        if (ispike[0] == 1):
             w += 2*LIFLearningRate
-        if (ispike[2] == 1):
+        if (ispike[1] == 1):
             w += 1*LIFLearningRate
         # if (ispike[2] == 1):
         #    w += 0.25*LIFLearningRate
