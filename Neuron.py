@@ -43,7 +43,7 @@ class OutputNeuron:
         return 'Output '+self.name+' with inputs '+str(self.inputNeuronIds)+' and '+dat
 
     def __repr__(self):
-        return 'Output "'+self.name+'" inputs:'+str(self.inputNeuronIds)+' dat:'+(str(None) if self.data is None else (self.data.shape[0]))
+        return 'Output "'+self.name+'" inputs:'+str(self.inputNeuronIds)+' dat:'+(str(None) if self.data is None else str(self.data.shape[0]))
 
     def init_stepcount(self, tstepcount):
         self.data = np.ndarray(tstepcount)
@@ -51,15 +51,15 @@ class OutputNeuron:
             self.vdata = np.ndarray(tstepcount)
 
     def add_datapoint(self, i, s, v, inhib):
-        self.data[i] = sum(s[self.inputNeuronIds])\
-            - sum(inhib[self.modelNeuronIds])
+        self.data[i] = sum(s[self.inputNeuronIds])
         if len(self.modelNeuronIds) > 0:
             self.vdata[i] = sum(v[self.modelNeuronIds])
 
     def plot(self, tsteps):
         if len(self.modelNeuronIds) > 0:
             plt.plot(tsteps, self.vdata, 'y-')
-        plt.plot(tsteps, self.data, 'b-')
+        ma = np.convolve(self.data, np.ones((20,))/10, mode='same')
+        plt.plot(tsteps, ma, 'b-')
         plt.title(self.name)
         plt.show()
 
