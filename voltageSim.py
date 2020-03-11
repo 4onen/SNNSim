@@ -62,7 +62,7 @@ def simulator(model, outputs, num_tsteps):
 
 if __name__ == "__main__":
     import sys
-    steps = 300 if len(sys.argv) < 2 else int(sys.argv[1])
+    steps = 1200 if len(sys.argv) < 2 else int(sys.argv[1])
     modelDict =\
         {'LIF': LIFNeuron([0], 0, 1, [1]),
          'LIFXOR': LIFXorNeuron([0], 0, 1, [1]),
