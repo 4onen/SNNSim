@@ -131,9 +131,9 @@ class LIFNeuron(ModelNeuron):
 
 
 class FNNeuron(ModelNeuron):
-    def __init__(self, inputNeuronIds, nV, nSpike):
-        super().__init__(inputNeuronIds, nV, nSpike)
-        self.W = 0.8640897783246109
+    def __init__(self, inputNeuronIds, nV, nSpike, w=None):
+        super().__init__(inputNeuronIds, nV, nSpike, [], w)
+        self.W = 0.8739065233685703
 
     def __str__(self):
         return 'FN neuron spiking on '+str(self.nV)+' and inputs '+str(self.inputNeuronIds)
@@ -154,5 +154,5 @@ class FNNeuron(ModelNeuron):
         dW = 0.08*(vlast+0.7-0.8*self.W)
         J[self.nV] += tstep*dV
         self.W += tstep*dW
-        print(self.W)
+        # print(self.W)
         return J

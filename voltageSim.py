@@ -30,7 +30,7 @@ def simulator(model, outputs, num_tsteps):
         else None
 
     # Prepare state variables
-    v = np.zeros(matSize)-0.0087281773402
+    v = np.zeros(matSize)-0.000874781
     for tidx in range(num_tsteps):
         # Stamp new excitation vector
         J = J0.copy()
@@ -42,7 +42,7 @@ def simulator(model, outputs, num_tsteps):
         v.shape = (v.shape[0],)
 
         # Calculate step spikes
-        spikes[0, 0] = math.sin(10*tidx*tstep) > 0
+        spikes[0, 0] = tidx % 10 == 0
 
         # Write outputs
         if vdata is not None:
@@ -58,5 +58,5 @@ def simulator(model, outputs, num_tsteps):
 
 
 if __name__ == "__main__":
-    model = ([FNNeuron([0], 0)], 1)
-    simulator(model, [0], 1000)
+    model = ([FNNeuron([0], 0, 1, [1e-1])], 1)
+    simulator(model, [0], 100)
