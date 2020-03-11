@@ -56,9 +56,7 @@ def simulator(model, outputs, num_tsteps):
         tsteps = np.linspace(0, num_tsteps*tstep, num_tsteps)
         for i, o in enumerate(outputs):
             plt.figure
-            plt.plot(tsteps, idata)
             plt.plot(tsteps, vdata[:, o])
-            plt.title(str(o))
         plt.show()
 
 
