@@ -17,21 +17,30 @@ def oneSim(modelFile, inputFile):
 
 def trainer(modelFile, trainingFile, testingFile, trainingEpochs, plotTraining=False):
     model = NetworkParser.readNetworkFile(modelFile)
-    trainingInput = InputParser.readInputFile(trainingFile)
+    testingInput = InputParser.readInputFile(testingFile)
+    simulator(model, testingInput, False, True)
 
     print(model[0], model[1], model[2])
+    for i, n in enumerate(model[1]):
+        if(len(n.w) == 25):
+            plt.imshow(np.reshape(n.w, (5, 5)))
+            plt.title('Initial weight matrix for neuron '+str(i+1))
+            plt.colorbar()
+            plt.show()
 
+    trainingInput = InputParser.readInputFile(trainingFile)
     for i in range(trainingEpochs):
         simulator(model, trainingInput, True, plotTraining)
         if (i+1) % 5 == 0:
             print(f'Epoch {i+1} completed.')
 
-    testingInput = InputParser.readInputFile(testingFile)
     simulator(model, testingInput, False, True)
     for i, n in enumerate(model[1]):
-        plt.imshow(np.reshape(n.w, (5, 5)))
-        plt.title(i+1)
-        plt.show()
+        if(len(n.w) == 25):
+            plt.imshow(np.reshape(n.w, (5, 5)))
+            plt.title('Final weight matrix for neuron '+str(i+1))
+            plt.colorbar()
+            plt.show()
 
 
 def simulator(model, inputs, training, output):
