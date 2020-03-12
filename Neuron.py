@@ -56,8 +56,8 @@ class OutputNeuron:
             self.vdata[i] = sum(v[self.modelNeuronIds])
 
     def plot(self, tsteps):
-        if len(self.modelNeuronIds) > 0:
-            plt.plot(tsteps, self.vdata, 'y-')
+        # if len(self.modelNeuronIds) > 0:
+        #     plt.plot(tsteps, self.vdata, 'y-')
         ma = np.convolve(self.data, np.ones((20,))/10, mode='same')
         plt.plot(tsteps, ma, 'b-')
         plt.title(self.name)
